@@ -1,5 +1,33 @@
 data "aws_caller_identity" "current" {}
 
+locals {
+  my_route_tables_per_destination = distinct(flatten([
+    for route_table_id in var.route_table_ids : [
+      for peer_vpc in var.peer_vpcs : [
+        for destination_cidr_block in peer_vpc.destination_cidr_blocks : {
+          name = "${var.vpc_name}_to_${peer_vpc.name}"
+          target_vpc = peer_vpc.name
+          route_table_id = route_table_id
+          destination_cidr_block = destination_cidr_block
+        }
+      ]
+    ]
+  ]))
+
+  target_route_tables_per_destination = distinct(flatten([
+    for peer_vpc in var.peer_vpcs : [
+      for reverse_route_table_id in peer_vpc.reverse_route_table_ids : [
+        for reverse_destination_cidr_block in peer_vpc.reverse_destination_cidr_blocks : {
+          name = "${peer_vpc.name}_to_${var.vpc_name}"
+          target_vpc = peer_vpc.name
+          route_table_id = reverse_route_table_id
+          destination_cidr_block = reverse_destination_cidr_block
+        }
+      ]
+    ]
+  ]))
+}
+
 resource "aws_vpc_peering_connection" "connections" {
   for_each    = { for peer_vpc in var.peer_vpcs : peer_vpc.name => peer_vpc }
   vpc_id      = "${var.vpc_id}"
@@ -15,4 +43,20 @@ resource "aws_vpc_peering_connection_options" "connection_options" {
   accepter {
     allow_remote_vpc_dns_resolution = each.value.allow_remote_vpc_dns_resolution
   }
+}
+
+resource "aws_route" "me_to_target" {
+  for_each    = { for item in local.my_route_tables_per_destination : item.name => item }
+
+  route_table_id = "${each.value.route_table_id}"
+  destination_cidr_block = "${each.value.destination_cidr_block}"
+  vpc_peering_connection_id = aws_vpc_peering_connection.connections["${each.value.target_vpc}"].id
+}
+
+resource "aws_route" "target_to_me" {
+  for_each    = { for item in local.target_route_tables_per_destination : item.name => item }
+
+  route_table_id = "${each.value.route_table_id}"
+  destination_cidr_block = "${each.value.destination_cidr_block}"
+  vpc_peering_connection_id = aws_vpc_peering_connection.connections["${each.value.target_vpc}"].id
 }
