@@ -2,10 +2,10 @@ data "aws_caller_identity" "current" {}
 
 locals {
   my_route_tables_per_destination = distinct(flatten([
-    for route_table_id in var.route_table_ids : [
+    for i, route_table_id in var.route_table_ids : [
       for peer_vpc in var.peer_vpcs : [
-        for destination_cidr_block in peer_vpc.destination_cidr_blocks : {
-          name = "${var.vpc_name}_to_${peer_vpc.name}"
+        for j, destination_cidr_block in peer_vpc.destination_cidr_blocks : {
+          name = "${var.vpc_name}_to_${peer_vpc.name}_${i}_${j}"
           target_vpc = peer_vpc.name
           route_table_id = route_table_id
           destination_cidr_block = destination_cidr_block
@@ -16,9 +16,9 @@ locals {
 
   target_route_tables_per_destination = distinct(flatten([
     for peer_vpc in var.peer_vpcs : [
-      for reverse_route_table_id in peer_vpc.reverse_route_table_ids : [
-        for reverse_destination_cidr_block in peer_vpc.reverse_destination_cidr_blocks : {
-          name = "${peer_vpc.name}_to_${var.vpc_name}"
+      for i, reverse_route_table_id in peer_vpc.reverse_route_table_ids : [
+        for j, reverse_destination_cidr_block in peer_vpc.reverse_destination_cidr_blocks : {
+          name = "${peer_vpc.name}_to_${var.vpc_name}_${i}_${j}"
           target_vpc = peer_vpc.name
           route_table_id = reverse_route_table_id
           destination_cidr_block = reverse_destination_cidr_block
