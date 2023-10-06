@@ -2,8 +2,8 @@ data "aws_caller_identity" "current" {}
 
 locals {
   my_route_tables_per_destination = distinct(flatten([
-    for i, route_table_id in var.route_table_ids : [
-      for peer_vpc in var.peer_vpcs : [
+    for peer_vpc in var.peer_vpcs : [
+      for i, route_table_id in peer_vpc.route_table_ids : [
         for j, destination_cidr_block in peer_vpc.destination_cidr_blocks : {
           name = "${var.vpc_name}_to_${peer_vpc.name}_${i}_${j}"
           target_vpc = peer_vpc.name

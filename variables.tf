@@ -10,11 +10,6 @@ variable "vpc_id" {
   default     = {}
 }
 
-variable "route_table_ids" {
-  description = "From VPC route table ids"
-  type        = list(string)
-}
-
 variable "peer_vpcs" {
   description = "A list of peer virtual private clouds"
   type        = any
@@ -25,10 +20,10 @@ variable "peer_vpcs" {
       auto_accept                       = true
       allow_remote_vpc_dns_resolution   = true
 
+      route_table_ids                   = ["route table ids"]
       destination_cidr_blocks           = ["cidr blocks"]         
-
-      reverse_destination_cidr_blocks = ["reverse destination cidr blocks"]
-      reverse_route_table_ids = ["reverse route table ids"]
+      reverse_route_table_ids           = ["reverse route table ids"]
+      reverse_destination_cidr_blocks   = ["reverse destination cidr blocks"]
     }
   ]
 }
