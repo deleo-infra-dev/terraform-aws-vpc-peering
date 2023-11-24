@@ -34,6 +34,10 @@ resource "aws_vpc_peering_connection" "connections" {
   peer_owner_id = "${data.aws_caller_identity.current.account_id}"
   peer_vpc_id = "${each.value.id}"
   auto_accept = each.value.auto_accept
+
+  tags = {
+    Name = try(var.vpc_peering_name, "${var.vpc_name}_to_${each.value.name}")
+  }
 }
 
 resource "aws_vpc_peering_connection_options" "connection_options" {
