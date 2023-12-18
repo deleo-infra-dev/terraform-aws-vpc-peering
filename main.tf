@@ -56,8 +56,7 @@ resource "aws_vpc_peering_connection" "connections" {
 }
 
 resource "aws_vpc_peering_connection_accepter" "connection_accepter" {
-  for_each    = { for peer_vpc in var.peer_vpcs : peer_vpc.name => peer_vpc }
-  count                     = peer_vpc.same_account ? 0 : 1
+  for_each    = { for peer_vpc in var.peer_vpcs : peer_vpc.name => peer_vpc if peer_vpc.same_account == false }
   provider                  = aws.accepter
   vpc_peering_connection_id = aws_vpc_peering_connection.connections["${each.value.name}"].id
   auto_accept               = peer_vpc.auto_accept
