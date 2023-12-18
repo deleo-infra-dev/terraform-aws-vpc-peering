@@ -32,3 +32,9 @@ variable "peer_vpcs" {
     }
   ]
 }
+
+variable "tags" {
+  description = "extra tags"
+  type        = any
+  default     = {}
+}
