@@ -13,6 +13,7 @@ variable "peer_vpcs" {
   type        = any
   default     = [
     {
+      peering_name                      = "peering name"
       name                              = "vpc name"
       id                                = "vpc id"
       auto_accept                       = true

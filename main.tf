@@ -5,6 +5,7 @@ locals {
     for peer_vpc in var.peer_vpcs : [
       for i, route_table_id in peer_vpc.route_table_ids : [
         for j, destination_cidr_block in peer_vpc.destination_cidr_blocks : {
+          peering_name = peer_vpc.peering_name
           name = "${var.vpc_name}_to_${peer_vpc.name}_${i}_${j}"
           target_vpc = peer_vpc.name
           route_table_id = route_table_id
@@ -18,6 +19,7 @@ locals {
     for peer_vpc in var.peer_vpcs : [
       for i, reverse_route_table_id in peer_vpc.reverse_route_table_ids : [
         for j, reverse_destination_cidr_block in peer_vpc.reverse_destination_cidr_blocks : {
+          peering_name = peer_vpc.peering_name
           name = "${peer_vpc.name}_to_${var.vpc_name}_${i}_${j}"
           target_vpc = peer_vpc.name
           route_table_id = reverse_route_table_id
@@ -36,7 +38,7 @@ resource "aws_vpc_peering_connection" "connections" {
   auto_accept = each.value.auto_accept
 
   tags = {
-    Name = "${var.vpc_name}_to_${each.value.name}"
+    Name = each.value.peering_name
   }
 }
 
