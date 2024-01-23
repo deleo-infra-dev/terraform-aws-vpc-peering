@@ -8,12 +8,6 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "vpc_peering_name" {
-  description = "vpc peering name"
-  type        = string
-  default     = ""
-}
-
 variable "peer_vpcs" {
   description = "A list of peer virtual private clouds"
   type        = any

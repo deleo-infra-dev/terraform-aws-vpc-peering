@@ -36,7 +36,7 @@ resource "aws_vpc_peering_connection" "connections" {
   auto_accept = each.value.auto_accept
 
   tags = {
-    Name = try(var.vpc_peering_name, "${var.vpc_name}_to_${each.value.name}")
+    Name = "${var.vpc_name}_to_${each.value.name}"
   }
 }
 
